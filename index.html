@@ -2,10 +2,10 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <title>Laboratório de Física RA - Investigação MRU</title>
     
-    <!-- Bibliotecas de RA e Renderização 3D Web (A-Frame + AR.js) -->
+    <!-- Bibliotecas Estáveis de RA e Renderização 3D Web -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
@@ -19,11 +19,11 @@
             background-color: #000;
         }
 
-        /* Tela de Instrução Inicial (Calibração do Chão) */
+        /* Tela de Instrução Inicial */
         #instrucao-inicial {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(10, 15, 30, 0.95);
+            background: rgba(10, 15, 30, 0.98);
             color: white;
             display: flex;
             flex-direction: column;
@@ -36,11 +36,11 @@
         }
 
         #instrucao-inicial h2 { color: #00f3ff; margin-bottom: 10px; }
-        #instrucao-inicial p { max-width: 400px; font-size: 16px; line-height: 1.5; color: #ccdedf; }
+        #instrucao-inicial p { max-width: 400px; font-size: 15px; line-height: 1.5; color: #ccdedf; }
         
         #btn-entendido {
             margin-top: 25px;
-            padding: 12px 30px;
+            padding: 14px 35px;
             background: #00f3ff;
             color: #0a0f1e;
             border: none;
@@ -51,7 +51,7 @@
             box-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
         }
 
-        /* Interface do Usuário (UI) 2D Superior - Cronômetro */
+        /* Interface do Usuário (UI) - Cronômetro */
         #painel-superior {
             position: absolute;
             top: 20px;
@@ -82,7 +82,7 @@
             text-shadow: 0 0 10px rgba(0, 243, 255, 0.7);
         }
 
-        /* Interface do Usuário (UI) 2D Inferior - Botões de Comando */
+        /* Interface do Usuário (UI) - Botões de Comando */
         #painel-inferior {
             position: absolute;
             bottom: 40px;
@@ -104,7 +104,6 @@
             border-radius: 8px;
             cursor: pointer;
             text-transform: uppercase;
-            transition: all 0.2s ease;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
 
@@ -114,17 +113,13 @@
             border: 1px solid #00f3ff;
         }
 
-        #btn-iniciar:active { transform: scale(0.95); }
-
         #btn-resetar {
             background: linear-gradient(135deg, #2c3e50, #3498db);
             color: #e0e0e0;
             border: 1px solid #7f8c8d;
         }
 
-        #btn-resetar:active { transform: scale(0.95); }
-
-        /* Letreiro de Avisos Pedagógicos na Tela */
+        /* Letreiro de Avisos Pedagógicos */
         #alerta-pedagogico {
             position: absolute;
             top: 115px;
@@ -150,14 +145,14 @@
 </head>
 <body>
 
-    <!-- Tela de instrução inicial para o aluno -->
+    <!-- Tela de instrução inicial -->
     <div id="instrucao-inicial">
         <h2>Experimento Científico: MRU</h2>
-        <p><b>Instruções para coleta de dados:</b><br>Aponte a câmera para o chão ou uma mesa longa. Observe atentamente o movimento do veículo. O cronômetro irá pausar sozinho em cada marcação para você anotar os valores encontrados.</p>
-        <button id="btn-entendido">Iniciar Análise</button>
+        <p><b>Instruções para coleta de dados:</b><br>Dê permissão de acesso à câmera se solicitado. Se o ambiente estiver escuro, use uma área bem iluminada. O cronômetro travará sozinho nas marcas de medição.</p>
+        <button id="btn-entendido">Entendido e Iniciar</button>
     </div>
 
-    <!-- UI HTML do Cronômetro -->
+    <!-- UI do Cronômetro -->
     <div id="painel-superior">
         <div id="label-cronometro">Tempo Decorrido</div>
         <div id="cronometro">00:00</div>
@@ -165,94 +160,95 @@
 
     <div id="alerta-pedagogico">MARCAÇÃO ALCANÇADA! REGISTRE O TEMPO</div>
 
-    <!-- UI HTML dos Botões -->
+    <!-- UI dos Botões -->
     <div id="painel-inferior">
         <button id="btn-iniciar" class="btn">Iniciar Fuga</button>
         <button id="btn-resetar" class="btn">Resetar</button>
     </div>
 
-    <!-- AMBIENTE DE REALIDADE AUMENTADA -->
-    <a-scene embedded arjs="sourceType: webcam; videoParameters: { facingMode: 'environment' }; debugUIEnabled: false;">
+    <!-- AR SCENE - Configuração de fallback estabilizada para travar câmera traseira e evitar quebras -->
+    <a-scene embedded arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;" vr-mode-ui="enabled: false">
         
-        <a-entity light="type: ambient; color: #ffffff; intensity: 0.8"></a-entity>
-        <a-entity light="type: directional; intensity: 0.6" position="1 4 2"></a-entity>
+        <a-entity light="type: ambient; color: #ffffff; intensity: 0.9"></a-entity>
+        <a-entity light="type: directional; intensity: 0.5" position="1 4 2"></a-entity>
 
-        <!-- ESPAÇO DE RASTREAMENTO DO LABORATÓRIO -->
-        <!-- Posicionado estrategicamente para dar profundidade e excelente visualização no chão -->
-        <a-entity id="laboratorio-mru" position="0 -1.2 -1.0">
+        <!-- PISTA E ELEMENTOS CENTRALIZADOS DE FORMA VISÍVEL MESMO SEM RASTREAMENTO COMPLETO -->
+        <a-entity id="laboratorio-mru" position="0 -1.0 -2.5">
             
-            <!-- PISTA DE CORRIDA FUTURISTA AMPLIFICADA (Escala visual de 3x de profundidade para melhor leitura em RA) -->
+            <!-- Pista principal ampliada (3x visual) -->
             <a-box id="pista" 
                    position="0 -0.01 -2.25" 
-                   width="0.4" height="0.02" depth="4.5" 
-                   material="color: #00f3ff; opacity: 0.25; transparent: true; shader: flat;">
+                   width="0.35" height="0.02" depth="4.5" 
+                   material="color: #00f3ff; opacity: 0.3; transparent: true; shader: flat;">
             </a-box>
 
-            <!-- Linha guia central do Laser -->
-            <a-cylinder position="0 0 -2.25" radius="0.008" height="4.5" rotation="90 0 0" material="color: #00f3ff; shader: flat;"></a-cylinder>
+            <!-- Linha guia laser central -->
+            <a-cylinder position="0 0 -2.25" radius="0.006" height="4.5" rotation="90 0 0" material="color: #00f3ff; shader: flat;"></a-cylinder>
 
-            <!-- MARCAÇÃO DE COILETA 1: 0,5m (Multiplicada visualmente na coordenada Z para -1.5) -->
+            <!-- Marcador 0.5m (Posicionado visualmente em Z = -1.5) -->
             <a-entity id="marcador-05" position="0 0 -1.5">
-                <a-cylinder radius="0.08" height="0.01" material="color: #00f3ff; opacity: 0.8; shader: flat Haus;"></a-cylinder>
-                <a-text value="0.5 m" position="0.25 0.05 0" scale="0.5 0.5 0.5" align="center" color="#00f3ff"></a-text>
+                <a-cylinder radius="0.06" height="0.01" material="color: #00f3ff; opacity: 0.8; shader: flat;"></a-cylinder>
+                <a-text value="0.5 m" position="0.25 0.05 0" scale="0.6 0.6 0.6" align="center" color="#00f3ff"></a-text>
             </a-entity>
 
-            <!-- MARCAÇÃO DE COLETA 2: 1,0m (Multiplicada visualmente na coordenada Z para -3.0) -->
+            <!-- Marcador 1.0m (Posicionado visualmente em Z = -3.0) -->
             <a-entity id="marcador-10" position="0 0 -3.0">
-                <a-cylinder radius="0.08" height="0.01" material="color: #00f3ff; opacity: 0.8; shader: flat;"></a-cylinder>
-                <a-text value="1.0 m" position="0.25 0.05 0" scale="0.5 0.5 0.5" align="center" color="#00f3ff"></a-text>
+                <a-cylinder radius="0.06" height="0.01" material="color: #00f3ff; opacity: 0.8; shader: flat;"></a-cylinder>
+                <a-text value="1.0 m" position="0.25 0.05 0" scale="0.6 0.6 0.6" align="center" color="#00f3ff"></a-text>
             </a-entity>
 
-            <!-- MARCAÇÃO DE COLETA 3: 1,5m - Linha de Chegada (Multiplicada visualmente na coordenada Z para -4.5) -->
+            <!-- Marcador 1.5m (Posicionado visualmente em Z = -4.5) -->
             <a-entity id="marcador-15" position="0 0 -4.5">
-                <a-box id="linha-chegada" width="0.5" height="0.01" depth="0.06" material="color: #ff0055; shader: flat;"></a-box>
-                <a-text value="1.5 m" position="0.25 0.05 0" scale="0.5 0.5 0.5" align="center" color="#ff0055"></a-text>
+                <a-box id="linha-chegada" width="0.4" height="0.01" depth="0.06" material="color: #ff0055; shader: flat;"></a-box>
+                <a-text value="1.5 m" position="0.25 0.05 0" scale="0.6 0.6 0.6" align="center" color="#ff0055"></a-text>
             </a-entity>
 
-            <!-- ROVER CIENTÍFICO (CARRINHO) -->
-            <!-- O script moverá este elemento de forma síncrona pela pista expandida -->
-            <a-entity id="rover" position="0 0.05 0">
-                <a-box width="0.16" height="0.08" depth="0.22" material="color: #ffffff; metalness: 0.6; roughness: 0.2;"></a-box>
-                <a-box width="0.12" height="0.05" depth="0.10" position="0 0.04 -0.05" material="color: #00f3ff; opacity: 0.7; transparent: true; shader: flat;"></a-box>
-                <!-- Rodas robustas para marcação visual de deslocamento no chão -->
-                <a-cylinder radius="0.035" height="0.03" rotation="0 0 90" position="-0.10 -0.01 0.06" material="color: #111;"></a-cylinder>
-                <a-cylinder radius="0.035" height="0.03" rotation="0 0 90" position="0.10 -0.01 0.06" material="color: #111;"></a-cylinder>
-                <a-cylinder radius="0.035" height="0.03" rotation="0 0 90" position="-0.10 -0.01 -0.06" material="color: #111;"></a-cylinder>
-                <a-cylinder radius="0.035" height="0.03" rotation="0 0 90" position="0.10 -0.01 -0.06" material="color: #111;"></a-cylinder>
-                <a-cone radius-bottom="0.02" radius-top="0" height="0.06" rotation="-90 0 0" position="0 0 0.11" material="color: #ff5500; shader: flat;"></a-cone>
+            <!-- VEÍCULO / CARRINHO -->
+            <a-entity id="rover" position="0 0.04 0">
+                <a-box width="0.16" height="0.08" depth="0.22" material="color: #ffffff; metalness: 0.5; roughness: 0.3;"></a-box>
+                <a-box width="0.12" height="0.05" depth="0.10" position="0 0.04 -0.04" material="color: #00f3ff; opacity: 0.7; transparent: true; shader: flat;"></a-box>
+                <!-- Rodas -->
+                <a-cylinder radius="0.035" height="0.03" rotation="0 0 90" position="-0.09 -0.01 0.06" material="color: #222;"></a-cylinder>
+                <a-cylinder radius="0.035" height="0.03" rotation="0 0 90" position="0.09 -0.01 0.06" material="color: #222;"></a-cylinder>
+                <a-cylinder radius="0.035" height="0.03" rotation="0 0 90" position="-0.09 -0.01 -0.06" material="color: #222;"></a-cylinder>
+                <a-cylinder radius="0.035" height="0.03" rotation="0 0 90" position="0.09 -0.01 -0.06" material="color: #222;"></a-cylinder>
+                <a-cone radius-bottom="0.015" radius-top="0" height="0.05" rotation="-90 0 0" position="0 0 0.11" material="color: #ff5500; shader: flat;"></a-cone>
             </a-entity>
 
         </a-entity>
 
+        <!-- Câmera fixa com perspectiva garantida -->
         <a-entity camera position="0 0 0"></a-entity>
     </a-scene>
 
-    <!-- MOTOR DE LÓGICA DO MOVIMENTO RETILÍNEO UNIFORME -->
+    <!-- MOTOR DE LÓGICA E CORREÇÃO DE TIME LOOP -->
     <script>
         document.getElementById('btn-entendido').addEventListener('click', () => {
             document.getElementById('instrucao-inicial').style.display = 'none';
+            // Força um acionamento de segurança para garantir o carregamento do vídeo em sistemas móveis
+            const video = document.querySelector('video');
+            if (video) { video.play().catch(()=>{}); }
         });
 
         const displayCronometro = document.getElementById('cronometro');
         const btnIniciar = document.getElementById('btn-iniciar');
         const btnResetar = document.getElementById('btn-resetar');
         const painelAlerta = document.getElementById('alerta-pedagogico');
-
         const elementRover = document.getElementById('rover');
+        
         const m05 = document.getElementById('marcador-05');
         const m10 = document.getElementById('marcador-10');
         const m15 = document.getElementById('marcador-15');
         const linhaChegada = document.getElementById('linha-chegada');
 
-        // Mapeamento de Escala Física Interna vs Escala Visual da RA
-        const VELOCIDADE_FISICA = 0.2; // v = 0.2 m/s reais
-        const ESCALA_VISUAL = 3.0;     // Amplia a pista em 3x visualmente no chão para não ficar curta
-        
+        // Configurações Físicas e Visuais Fixas
+        const VELOCIDADE_FISICA = 0.2; // 0.2 m/s
+        const ESCALA_VISUAL = 3.0;     
         const LIMITE_FISICO_PISTA = -1.5; 
-        const TEMPO_PAUSA_MS = 1200; 
+        const TEMPO_PAUSA_MS = 1500; // Tempo de congelamento para anotação
 
         let tempoDecorridoMS = 0;
-        let posicaoFisicaZ = 0; // Posição escalar matemática
+        let posicaoFisicaZ = 0; 
         let emMovimento = false;
         let emPausaPedagogica = false;
         
@@ -261,31 +257,42 @@
             { fisicaZ: -1.0, alcancado: false, elemento3D: m10 }
         ];
 
-        let loopFisicaInterval = null;
         let ultimoTimestamp = 0;
 
-        function atualizarFisica() {
-            if (!emMovimento || emPausaPedagogica) return;
+        // Loop principal robusto usando requestAnimationFrame (não trava se a cena demorar a iniciar)
+        function loopFisica() {
+            requestAnimationFrame(loopFisica);
+
+            if (!emMovimento || emPausaPedagogica) {
+                // Mesmo parado ou pausado, atualiza o timestamp para evitar saltos temporais gigantescos ao retornar
+                ultimoTimestamp = performance.now();
+                return;
+            }
 
             const agora = performance.now();
+            if (ultimoTimestamp === 0) ultimoTimestamp = agora;
+            
             const deltaTime = (agora - ultimoTimestamp) / 1000; 
             ultimoTimestamp = agora;
 
-            tempoDecorridoMS += deltaTime * 1000;
-            posicaoFisicaZ -= VELOCIDADE_FISICA * deltaTime; 
+            // Evita variações bruscas por lag de renderização do celular
+            const deltaProtegido = Math.min(deltaTime, 0.1);
 
-            // Checagem de Fim de Pista (1.5m reais)
+            tempoDecorridoMS += deltaProtegido * 1000;
+            posicaoFisicaZ -= VELOCIDADE_FISICA * deltaProtegido; 
+
+            // Verificação de fim de curso (1.5 metros reais)
             if (posicaoFisicaZ <= LIMITE_FISICO_PISTA) {
                 posicaoFisicaZ = LIMITE_FISICO_PISTA;
                 let visualZ = posicaoFisicaZ * ESCALA_VISUAL;
-                elementRover.setAttribute('position', `0 0.05 ${visualZ}`);
+                elementRover.setAttribute('position', `0 0.04 ${visualZ}`);
                 finalizarExperimento();
                 return;
             }
 
-            // Aplica o fator de escala visual apenas na translação do cenário 3D
+            // Move visualmente o carrinho baseado na escala ampliada
             let visualZ = posicaoFisicaZ * ESCALA_VISUAL;
-            elementRover.setAttribute('position', `0 0.05 ${visualZ}`);
+            elementRover.setAttribute('position', `0 0.04 ${visualZ}`);
             
             atualizarDisplayUI();
             verificarPontosDeControle();
@@ -297,10 +304,10 @@
                 
                 if (posicaoFisicaZ <= cp.fisicaZ && !cp.alcancado) {
                     cp.alcancado = true;
-                    posicaoFisicaZ = cp.fisicaZ; 
+                    posicaoFisicaZ = cp.fisicaZ; // Alinha exatamente na marca
                     
-                    let visualZ = Sample = posicaoFisicaZ * ESCALA_VISUAL;
-                    elementRover.setAttribute('position', `0 0.05 ${visualZ}`);
+                    let visualZ = posicaoFisicaZ * ESCALA_VISUAL;
+                    elementRover.setAttribute('position', `0 0.04 ${visualZ}`);
                     
                     dispararPausaPedagogica(cp);
                     break;
@@ -308,11 +315,11 @@
             }
         }
 
-        function dispararPausaPedagogica(checkpoint) {
+        function disparaPausaPedagogica(checkpoint) {
             emPausaPedagogica = true;
             painelAlerta.style.display = 'block';
             
-            // Transforma o marcador em Amarelo para destacar onde o cronômetro travou
+            // Destaca visualmente o marcador que causou a parada
             checkpoint.elemento3D.querySelector('a-cylinder').setAttribute('material', 'color: #ffb800; shader: flat;');
             checkpoint.elemento3D.querySelector('a-text').setAttribute('color', '#ffb800');
 
@@ -328,10 +335,7 @@
 
         function finalizarExperimento() {
             emMovimento = false;
-            clearInterval(loopFisicaInterval);
-            loopFisicaInterval = null;
-            
-            tempoDecorridoMS = 7500; // Sincronia matemática exata com o MRU teórico
+            tempoDecorridoMS = 7500; // Alinhamento exato teórico com as leis do MRU para 1.5m a 0.2m/s
             atualizarDisplayUI();
 
             linhaChegada.setAttribute('material', 'color: #ffb800; shader: flat;');
@@ -352,22 +356,17 @@
             if (!emMovimento && !emPausaPedagogica && posicaoFisicaZ > LIMITE_FISICO_PISTA) {
                 emMovimento = true;
                 ultimoTimestamp = performance.now();
-                loopFisicaInterval = setInterval(atualizarFisica, 16);
             }
         });
 
         btnResetar.addEventListener('click', () => {
-            if (loopFisicaInterval) {
-                clearInterval(loopFisicaInterval);
-                loopFisicaInterval = null;
-            }
-
             tempoDecorridoMS = 0;
             posicaoFisicaZ = 0;
             emMovimento = false;
             emPausaPedagogica = false;
+            ultimoTimestamp = 0;
 
-            elementRover.setAttribute('position', '0 0.05 0');
+            elementRover.setAttribute('position', '0 0.04 0');
             displayCronometro.innerText = "00:00";
             painelAlerta.style.display = 'none';
 
@@ -380,6 +379,9 @@
             linhaChegada.setAttribute('material', 'color: #ff0055; shader: flat;');
             m15.querySelector('a-text').setAttribute('color', '#ff0055');
         });
+
+        // Inicia o motor de frames imediatamente de forma segura
+        requestAnimationFrame(loopFisica);
     </script>
 </body>
 </html>
