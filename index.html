@@ -148,7 +148,7 @@
     <!-- Tela de instrução inicial -->
     <div id="instrucao-inicial">
         <h2>Experimento Científico: MRU</h2>
-        <p><b>Instruções para coleta de dados:</b><br>Dê permissão de acesso à câmera se solicitado. Se o ambiente estiver escuro, use uma área bem iluminada. O cronômetro travará sozinho nas marcas de medição.</p>
+        <p><b>Instruções para coleta de dados:</b><br>Dê permissão de acesso à câmera se solicitado. O cronômetro e o carrinho farão uma parada em "Câmera Lenta" a cada marcação para você anotar os valores exatos.</p>
         <button id="btn-entendido">Entendido e Iniciar</button>
     </div>
 
@@ -158,7 +158,7 @@
         <div id="cronometro">00:00</div>
     </div>
 
-    <div id="alerta-pedagogico">MARCAÇÃO ALCANÇADA! REGISTRE O TEMPO</div>
+    <div id="alerta-pedagogico">EFEITO CÂMERA LENTA: ANOTE O TEMPO!</div>
 
     <!-- UI dos Botões -->
     <div id="painel-inferior">
@@ -166,13 +166,13 @@
         <button id="btn-resetar" class="btn">Resetar</button>
     </div>
 
-    <!-- AR SCENE - Configuração de fallback estabilizada para travar câmera traseira e evitar quebras -->
+    <!-- AR SCENE -->
     <a-scene embedded arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;" vr-mode-ui="enabled: false">
         
         <a-entity light="type: ambient; color: #ffffff; intensity: 0.9"></a-entity>
         <a-entity light="type: directional; intensity: 0.5" position="1 4 2"></a-entity>
 
-        <!-- PISTA E ELEMENTOS CENTRALIZADOS DE FORMA VISÍVEL MESMO SEM RASTREAMENTO COMPLETO -->
+        <!-- PISTA E ELEMENTOS DE INVESTIGAÇÃO -->
         <a-entity id="laboratorio-mru" position="0 -1.0 -2.5">
             
             <!-- Pista principal ampliada (3x visual) -->
@@ -217,15 +217,13 @@
 
         </a-entity>
 
-        <!-- Câmera fixa com perspectiva garantida -->
         <a-entity camera position="0 0 0"></a-entity>
     </a-scene>
 
-    <!-- MOTOR DE LÓGICA E CORREÇÃO DE TIME LOOP -->
+    <!-- MOTOR DE LÓGICA REFEITO E CORRIGIDO -->
     <script>
         document.getElementById('btn-entendido').addEventListener('click', () => {
             document.getElementById('instrucao-inicial').style.display = 'none';
-            // Força um acionamento de segurança para garantir o carregamento do vídeo em sistemas móveis
             const video = document.querySelector('video');
             if (video) { video.play().catch(()=>{}); }
         });
@@ -241,11 +239,11 @@
         const m15 = document.getElementById('marcador-15');
         const linhaChegada = document.getElementById('linha-chegada');
 
-        // Configurações Físicas e Visuais Fixas
-        const VELOCIDADE_FISICA = 0.2; // 0.2 m/s
-        const ESCALA_VISUAL = 3.0;     
+        // Configurações Físicas do MRU
+        const VELOCIDADE_FISICA = 0.2; // Velocidade constante de 0.2 m/s
+        const ESCALA_VISUAL = 3.0;     // Multiplicador da pista virtual
         const LIMITE_FISICO_PISTA = -1.5; 
-        const TEMPO_PAUSA_MS = 1500; // Tempo de congelamento para anotação
+        const TEMPO_PAUSA_MS = 3000;   // Tempo estendido de 3 segundos em câmera lenta
 
         let tempoDecorridoMS = 0;
         let posicaoFisicaZ = 0; 
@@ -259,12 +257,11 @@
 
         let ultimoTimestamp = 0;
 
-        // Loop principal robusto usando requestAnimationFrame (não trava se a cena demorar a iniciar)
+        // Renderização contínua de alta precisão
         function loopFisica() {
             requestAnimationFrame(loopFisica);
 
             if (!emMovimento || emPausaPedagogica) {
-                // Mesmo parado ou pausado, atualiza o timestamp para evitar saltos temporais gigantescos ao retornar
                 ultimoTimestamp = performance.now();
                 return;
             }
@@ -275,13 +272,12 @@
             const deltaTime = (agora - ultimoTimestamp) / 1000; 
             ultimoTimestamp = agora;
 
-            // Evita variações bruscas por lag de renderização do celular
             const deltaProtegido = Math.min(deltaTime, 0.1);
 
             tempoDecorridoMS += deltaProtegido * 1000;
             posicaoFisicaZ -= VELOCIDADE_FISICA * deltaProtegido; 
 
-            // Verificação de fim de curso (1.5 metros reais)
+            // Checagem exata de Fim de Pista (1.5m)
             if (posicaoFisicaZ <= LIMITE_FISICO_PISTA) {
                 posicaoFisicaZ = LIMITE_FISICO_PISTA;
                 let visualZ = posicaoFisicaZ * ESCALA_VISUAL;
@@ -290,7 +286,6 @@
                 return;
             }
 
-            // Move visualmente o carrinho baseado na escala ampliada
             let visualZ = posicaoFisicaZ * ESCALA_VISUAL;
             elementRover.setAttribute('position', `0 0.04 ${visualZ}`);
             
@@ -302,24 +297,27 @@
             for (let i = 0; i < checkpoints.length; i++) {
                 let cp = checkpoints[i];
                 
+                // Se o carrinho cruzar ou tocar a linha exata da marcação
                 if (posicaoFisicaZ <= cp.fisicaZ && !cp.alcancado) {
                     cp.alcancado = true;
-                    posicaoFisicaZ = cp.fisicaZ; // Alinha exatamente na marca
+                    posicaoFisicaZ = cp.fisicaZ; // Ajusta na posição exata da linha
                     
                     let visualZ = posicaoFisicaZ * ESCALA_VISUAL;
                     elementRover.setAttribute('position', `0 0.04 ${visualZ}`);
                     
+                    atualizarDisplayUI(); // Fixa o tempo exato da passagem na tela
                     dispararPausaPedagogica(cp);
                     break;
                 }
             }
         }
 
-        function disparaPausaPedagogica(checkpoint) {
+        // FUNÇÃO CORRIGIDA: Executa o congelamento cirúrgico para a anotação do aluno
+        function dispararPausaPedagogica(checkpoint) {
             emPausaPedagogica = true;
             painelAlerta.style.display = 'block';
             
-            // Destaca visualmente o marcador que causou a parada
+            // Transforma o marcador em amarelo neon para destacar a zona de medição
             checkpoint.elemento3D.querySelector('a-cylinder').setAttribute('material', 'color: #ffb800; shader: flat;');
             checkpoint.elemento3D.querySelector('a-text').setAttribute('color', '#ffb800');
 
@@ -329,13 +327,13 @@
                 checkpoint.elemento3D.querySelector('a-text').setAttribute('color', '#00f3ff');
                 
                 ultimoTimestamp = performance.now();
-                emPausaPedagogica = false;
+                emPausaPedagogica = false; // Libera o carrinho para o próximo trecho
             }, TEMPO_PAUSA_MS);
         }
 
         function finalizarExperimento() {
             emMovimento = false;
-            tempoDecorridoMS = 7500; // Alinhamento exato teórico com as leis do MRU para 1.5m a 0.2m/s
+            tempoDecorridoMS = 7500; // Sincronia ideal teórica do MRU (1.5m / 0.2m/s = 7.5s)
             atualizarDisplayUI();
 
             linhaChegada.setAttribute('material', 'color: #ffb800; shader: flat;');
@@ -380,7 +378,7 @@
             m15.querySelector('a-text').setAttribute('color', '#ff0055');
         });
 
-        // Inicia o motor de frames imediatamente de forma segura
+        // Start imediato do motor de física
         requestAnimationFrame(loopFisica);
     </script>
 </body>
